@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question Viewer</title>
+</head>
+<body>
+  <!-- ✅ Add this container to display the question -->
+  <div id="questionBox"></div>
+
+  <script>
+    const id = window.location.pathname.split('/').pop();
+    fetch(`/api/questions/${id}`)
+      .then(res => res.json())
+      .then(q => {
+        document.getElementById('questionBox').innerHTML = `
+          <h2>${q.title}</h2>
+          <p>${q.description}</p>
+          <h4>Sample Input:</h4>
+          <pre>${q.input}</pre>
+          <h4>Expected Output:</h4>
+          <pre>${q.output}</pre>
+        `;
+      })
+      .catch(err => {
+        document.getElementById('questionBox').innerHTML = `<p style="color:red;">Failed to load question.</p>`;
+        console.error(err);
+      });
+  </script>
+</body>
+</html>

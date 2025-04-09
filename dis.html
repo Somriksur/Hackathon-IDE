@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Disqualified</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #1f1c2c, #928DAB);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .container {
+      background: rgba(255, 0, 0, 0.1);
+      border: 2px solid rgba(255, 0, 0, 0.5);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+      backdrop-filter: blur(15px);
+      padding: 60px;
+      border-radius: 20px;
+      text-align: center;
+      animation: slideUp 1s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    h1 {
+      color: #ff4c4c;
+      font-size: 48px;
+      animation: glow 1s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff4c4c; }
+      to { text-shadow: 0 0 20px #ff0000; }
+    }
+
+    p {
+      color: white;
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .btn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background-color: #ff4c4c;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s, background-color 0.3s;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      background-color: #ff1c1c;
+    }
+
+    .floating-circles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background-color: rgba(255, 0, 0, 0.1);
+      animation: float 10s infinite ease-in-out alternate;
+    }
+
+    .circle:nth-child(1) {
+      width: 200px;
+      height: 200px;
+      top: 10%;
+      left: 5%;
+      animation-delay: 0s;
+    }
+
+    .circle:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      bottom: 20%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    .circle:nth-child(3) {
+      width: 100px;
+      height: 100px;
+      top: 40%;
+      left: 40%;
+      animation-delay: 4s;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-50px) scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-circles">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+  </div>
+
+  <div class="container">
+    <h1>Disqualified</h1>
+    <p>You have violated the rules or switched tabs during the exam.</p>
+    <p>Your session has been terminated for fairness and integrity.</p>
+    <button class="btn" onclick="location.href='/auth.html'">Return to Login</button>
+  </div>
+  <script>
+    fetch("/api/disqualify", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: localStorage.getItem("token"), // Or cookie/session
+  }
+})
+.then(res => res.json())
+.then(data => {
+  if (data.blocked) {
+    window.location.href = "/blocked.html";
+  }
+});
+
+let disqualifyCount = parseInt(localStorage.getItem("disqualifyCount")) || 0;
+  disqualifyCount++;
+  localStorage.setItem("disqualifyCount", disqualifyCount);
+
+  if (disqualifyCount >= 3) {
+    localStorage.setItem("blocked", "true");
+  }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Signup</title>
+    <style>
+      * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928DAB);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 360px;
+      color: white;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      animation: slideUp 1s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 26px;
+      animation: zoomIn 0.6s ease;
+    }
+
+    @keyframes zoomIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: 0.3s;
+      backdrop-filter: blur(5px);
+      box-shadow: inset 0 0 5px #000;
+    }
+
+    input:focus {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 8px 2px #00eaff;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { box-shadow: 0 0 8px 2px #00eaff; }
+      to { box-shadow: 0 0 12px 4px #00ffff; }
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #00c3ff, #007BFF);
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 12px #00eaff;
+    }
+
+    .toggle {
+      margin-top: 20px;
+      color: #00c3ff;
+      cursor: pointer;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    .toggle:hover {
+      color: #00ffff;
+      text-decoration: underline;
+    }
+
+    .message {
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #f77;
+    }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="formTitle">Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="handleAuth()">Submit</button>
+        <p class="toggle" onclick="toggleForm()">Don't have an account? Sign up</p>
+        <p id="message" class="message"></p>
+    </div>
+    
+    <script>
+        let isLogin = true;
+
+        function toggleForm() {
+            isLogin = !isLogin;
+            document.getElementById('formTitle').innerText = isLogin ? 'Login' : 'Sign Up';
+            document.querySelector('.toggle').innerText = isLogin ? "Don't have an account? Sign up" : "Already have an account? Login";
+            document.getElementById('message').innerText = ""; // Clear previous message
+        }
+
+        async function handleAuth() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const messageElement = document.getElementById('message');
+
+            if (!username || !password) {
+                messageElement.innerText = "Please fill in all fields.";
+                messageElement.style.color = "red";
+                return;
+            }
+
+            const endpoint = isLogin ? '/login' : '/signup';
+            try {
+                const response = await fetch(`http://localhost:5000${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageElement.innerText = data.message;
+                    messageElement.style.color = "green";
+
+                    if (isLogin) {
+    localStorage.setItem('token', data.token);
+
+    // Check if a redirect URL was saved
+    const redirectURL = localStorage.getItem("redirectAfterLogin");
+    if (redirectURL) {
+        localStorage.removeItem("redirectAfterLogin"); // Clean up
+        window.location.href = redirectURL;
+    } else {
+        window.location.href = '/';
+    }
+}
+
+                } else {
+                    messageElement.innerText = data.message;
+                    messageElement.style.color = "red";
+                }
+            } catch (error) {
+                messageElement.innerText = "An error occurred. Please try again.";
+                messageElement.style.color = "red";
+            }
+        }
+
+        // Force logout if user is not authenticated
+        if (!localStorage.getItem("token") && window.location.pathname !== "/auth.html") {
+    window.location.href = "/auth.html";
+}
+
+    </script>
+</body>
+</html>
